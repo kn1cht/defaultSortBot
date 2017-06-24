@@ -21,10 +21,14 @@ function main() {
       return getAllPagesPromise(); // get all page data as JSON
     }).then((data) => {
       data.forEach((page) => {
-        getArticlePromise(page.title)
+        let pageData = null;
+        let pageTitle = page.title;
+        let editSummary = 'Bot: Add DEFAULTSORT ';
+        getArticlePromise(pageTitle)
           .then((data) => {
-            if(! /\{\{DEFAULTSORT:.*\}\}/.test(data)){ // test if page already have DEFAULTSORT
-              return tokenize(page.title);
+            pageData = data;
+            if(! /\{\{DEFAULTSORT:.*\}\}/.test(pageData)){ // test if page already have DEFAULTSORT
+              return tokenize(pageTitle);
             }
             else { return; }
           }).then((tokens) => {
@@ -32,7 +36,15 @@ function main() {
             let reading = getReadingFromTokens(tokens);
             reading = katakanaToHiragana(reading);
             reading = normalizeForDefaultSort(reading);
-            console.log(reading);
+
+            pageData += '\n{{DEFAULTSORT: ' + reading + '}}';
+            editSummary += reading;
+            bot.edit(pageTitle, pageData, editSummary, (err) => {
+              if(err) { console.error(err); }
+              console.log('Edited ' + pageTitle + ': ' + editSummary);
+            });
+          }).catch((err) => {
+            console.error(err);
           });
       });
     }).catch((err) => {
