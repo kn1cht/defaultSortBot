@@ -1,0 +1,6 @@
+server: # your mediawiki server
+  "en.wikipedia.org"
+path: #your api.php path
+  "/w"
+username: # your username
+password: # your password

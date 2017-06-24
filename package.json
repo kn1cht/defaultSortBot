@@ -1,0 +1,19 @@
+{
+  "name": "defaultsortbot",
+  "version": "1.0.0",
+  "description": "add DEFAULTSORT automatically to mediawiki articles.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kn1cht",
+  "license": "MIT",
+  "dependencies": {
+    "cron": "^1.0.5",
+    "kuromoji": "^0.1.1",
+    "node-config": "^0.0.2",
+    "nodemw": "^0.10.1",
+    "request": "^2.72.0"
+  },
+  "devDependencies": {}
+}
