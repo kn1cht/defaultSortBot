@@ -14,12 +14,22 @@ if (require.main === module) {
   main()
 }
 
-function main() {
-  logInPromise(config.username, config.password)
+function main(){
+
+}
+
+function setDefaultSort() {
+  logInPromise(config.username, config.password) // login to get permisson
     .then(() => {
-      return getArticlePromise('Pandoc');
+      return getAllPagesPromise(); // get all page data as JSON
     }).then((data) => {
-      console.log(data);
+      data.forEach((page) => {
+        getArticlePromise(page.title).then((data) => {
+          if(! /\{\{DEFAULTSORT:.*\}\}/.test(data)){ // test if page already have DEFAULTSORT
+            console.log(page.title);
+          }
+        });
+      });
     }).catch((err) => {
       console.error(err);
     });
@@ -33,6 +43,18 @@ function logInPromise(username, password) {
         return;
       }
       resolve();
+    });
+  });
+}
+
+function getAllPagesPromise(title) {
+  return new Promise(function(resolve, reject){
+    bot.getAllPages((err, data) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(data);
     });
   });
 }
