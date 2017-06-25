@@ -2,7 +2,6 @@
 'use strict';
 
 const config = require('config');
-const CronJob = require('node-cron')
 const nodemw = require('nodemw');
 const tokenize = require('kuromojin').tokenize;
 const unorm = require('unorm');
@@ -12,6 +11,8 @@ const bot = new nodemw({
   server: config.server,
   path: config.path,
 });
+
+module.exports = main;
 
 if (require.main === module) { main(); }
 

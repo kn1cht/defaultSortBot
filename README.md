@@ -25,3 +25,14 @@ Set your config in default.yaml before run defaultSortBot.
 - namespaces : [namespace](https://www.mediawiki.org/wiki/Manual:Namespace/ja) to process.
   * id: namespace id number(get list from `api.php?action=query&meta=siteinfo&siprop=namespaces`).
   * prefix: namespace prefix(e.g. `"Category"`) to exclude from DEFAULTSORT
+
+## Run as scheduled task
+
+```bash
+vi schedule.js
+npm i -g forever
+forever start schedule.js
+```
+
+Used [merencia/node-cron](https://github.com/merencia/node-cron) to generate scheduled job.
+Please modify setting in schedule.js as you like.
