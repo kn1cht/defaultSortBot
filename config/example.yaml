@@ -1,0 +1,14 @@
+server: # your mediawiki server
+  "ja.wikipedia.org"
+path: #your api.php path
+  "/w"
+username: # your username
+password: # your password
+namespaces: # namespace id and prefix to process
+  -
+    id: 0
+    prefix: ""
+  -
+    id: 14
+    prefix: "Category"
+
