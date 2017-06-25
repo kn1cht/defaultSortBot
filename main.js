@@ -2,7 +2,7 @@
 'use strict';
 
 const config = require('config');
-const CronJob = require('cron').CronJob
+const CronJob = require('node-cron')
 const nodemw = require('nodemw');
 const tokenize = require('kuromojin').tokenize;
 const unorm = require('unorm');
@@ -16,50 +16,39 @@ const bot = new nodemw({
 if (require.main === module) { main(); }
 
 function main() {
-  logInPromise(config.username, config.password) // login to get permisson
-    .then(() => {
-      return getAllPagesPromise(); // get all page data as JSON
+  config.namespaces.forEach((ns) => {
+    logInPromise(config.username, config.password).then(() => { // login to get permisson
+      return getPagesInNamespacePromise(ns.id) // get page data as JSON
     }).then((data) => {
       data.forEach((page) => {
         let pageData = null;
-        let pageTitle = page.title;
+        let pageTitleNoPrefix = (page.title.indexOf(ns.prefix + ':') >= 0) ? page.title.substr(ns.prefix.length + 1) : page.title;
         let editSummary = 'Bot: Add DEFAULTSORT ';
-        getArticlePromise(pageTitle)
-          .then((data) => {
-            pageData = data;
-            if(! /\{\{DEFAULTSORT:.*\}\}/.test(pageData)){ // test if page already have DEFAULTSORT
-              return tokenize(pageTitle);
-            }
-            else { return; }
-          }).then((tokens) => {
-            if(!tokens) { return; }
-            let reading = getReadingFromTokens(tokens);
-            reading = katakanaToHiragana(reading);
-            reading = normalizeForDefaultSort(reading);
 
-            pageData += '\n{{DEFAULTSORT: ' + reading + '}}';
-            editSummary += reading;
-            bot.edit(pageTitle, pageData, editSummary, (err) => {
-              if(err) { console.error(err); }
-              console.log('Edited ' + pageTitle + ': ' + editSummary);
-            });
-          }).catch((err) => {
-            console.error(err);
+        getArticlePromise(page.title).then((data) => {
+          pageData = data;
+          if(/\{\{DEFAULTSORT:.*\}\}/.test(pageData)){ return; } // skip if page already have DEFAULTSORT
+          else { return tokenize(pageTitleNoPrefix); }
+        }).then((tokens) => {
+          if(!tokens) { return; }
+          let reading = getReadingFromTokens(tokens);
+          reading = katakanaToHiragana(reading);
+          reading = normalizeForDefaultSort(reading);
+
+          pageData += '\n{{DEFAULTSORT: ' + reading + '}}';
+          editSummary += reading;
+          bot.edit(page.title, pageData, editSummary, (err) => {
+            if(err) { console.error(err); }
+            console.info('Edited ' + page.title + '/ ' + editSummary);
           });
+        }).catch((err) => {
+          console.error(err);
+        });
       });
     }).catch((err) => {
-      console.error(err);
+    console.error(err);
     });
-}
-
-function getReadingFromTokens(tokens){
-  let reading = '';
-  tokens.forEach((token) => {
-    if(token.reading) { reading += token.reading; }
-    else { reading += token.surface_form; }
-    });
-  reading = unorm.nfkc(reading); // unicode normalization
-  return reading;
+  });
 }
 
 function logInPromise(username, password) {
@@ -71,9 +60,9 @@ function logInPromise(username, password) {
   });
 }
 
-function getAllPagesPromise(title) {
+function getPagesInNamespacePromise(namespace) {
   return new Promise((resolve, reject) => {
-    bot.getAllPages((err, data) => {
+    bot.getPagesInNamespace(namespace, (err, data) => {
       if (err) { reject(err); }
       else { resolve(data);  }
     });
@@ -89,9 +78,17 @@ function getArticlePromise(title) {
   });
 }
 
+function getReadingFromTokens(tokens){
+  let reading = tokens.reduce((r, token) => {
+    return (token.reading) ? (r + token.reading) : (r + token.surface_form);
+  }, '');
+  reading = unorm.nfkc(reading); // unicode normalization
+  return reading;
+}
+
 function katakanaToHiragana(src) {
   return src.replace(/[\u30a1-\u30f6]/g, (match) => {
-    var chr = match.charCodeAt(0) - 0x60;
+    const chr = match.charCodeAt(0) - 0x60;
     return String.fromCharCode(chr);
   });
 }

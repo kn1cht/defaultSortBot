@@ -4,3 +4,6 @@ path: #your api.php path
   "/w"
 username: # your username
 password: # your password
+namespaces: # namespace id to process
+  - 0
+  - 14
