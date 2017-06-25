@@ -8,8 +8,8 @@ const unorm = require('unorm');
 
 /*** mediawiki API bot ***/
 const bot = new nodemw({
-  server: config.server,
-  path: config.path,
+  server : config.server,
+  path   : config.path,
 });
 
 module.exports = main;
@@ -19,16 +19,16 @@ if (require.main === module) { main(); }
 function main() {
   config.namespaces.forEach((ns) => {
     logInPromise(config.username, config.password).then(() => { // login to get permisson
-      return getPagesInNamespacePromise(ns.id) // get page data as JSON
+      return getPagesInNamespacePromise(ns.id); // get page data as JSON
     }).then((data) => {
       data.forEach((page) => {
         let pageData = null;
-        let pageTitleNoPrefix = (page.title.indexOf(ns.prefix + ':') >= 0) ? page.title.substr(ns.prefix.length + 1) : page.title;
+        const pageTitleNoPrefix = (page.title.indexOf(ns.prefix + ':') >= 0) ? page.title.substr(ns.prefix.length + 1) : page.title;
         let editSummary = 'Bot: Add DEFAULTSORT ';
 
         getArticlePromise(page.title).then((data) => {
           pageData = data;
-          if(/\{\{DEFAULTSORT:.*\}\}/.test(pageData)){ return; } // skip if page already have DEFAULTSORT
+          if(/\{\{DEFAULTSORT:.*\}\}/.test(pageData)) { return; } // skip if page already have DEFAULTSORT
           else { return tokenize(pageTitleNoPrefix); }
         }).then((tokens) => {
           if(!tokens) { return; }
@@ -47,7 +47,7 @@ function main() {
         });
       });
     }).catch((err) => {
-    console.error(err);
+      console.error(err);
     });
   });
 }
@@ -79,9 +79,9 @@ function getArticlePromise(title) {
   });
 }
 
-function getReadingFromTokens(tokens){
-  let reading = tokens.reduce((r, token) => {
-    return (token.reading) ? (r + token.reading) : (r + token.surface_form);
+function getReadingFromTokens(tokens) {
+  let reading = tokens.reduce((res, token) => {
+    return (token.reading) ? (res + token.reading) : (res + token.surface_form);
   }, '');
   reading = unorm.nfkc(reading); // unicode normalization
   return reading;
@@ -94,33 +94,33 @@ function katakanaToHiragana(src) {
   });
 }
 
-function normalizeForDefaultSort(str){
+function normalizeForDefaultSort(str) {
   const defaultSortDictionary = {
-    'ぁ': 'あ', 'ぃ': 'い', 'ぅ': 'う', 'ぇ': 'え', 'ぉ': 'お',
-    'が': 'か', 'ぎ': 'き', 'ぐ': 'く', 'げ': 'け', 'ご': 'こ',
-    'ざ': 'さ', 'じ': 'し', 'ず': 'す', 'ぜ': 'せ', 'ぞ': 'そ',
-    'だ': 'た', 'ぢ': 'ち', 'っ': 'つ', 'づ': 'つ', 'で': 'て',
-    'ど': 'と', 'ば': 'は', 'ぱ': 'は', 'び': 'ひ', 'ぴ': 'ひ',
-    'ぶ': 'ふ', 'ぷ': 'ふ', 'べ': 'へ', 'ぺ': 'へ', 'ぼ': 'ほ',
-    'ぽ': 'ほ', 'ゃ': 'や', 'ゅ': 'ゆ', 'ょ': 'よ', 'ゎ': 'わ',
-    'ゐ': 'い', 'ゑ': 'え', 'ゔ': 'う'
-  }
+    'ぁ' : 'あ', 'ぃ' : 'い', 'ぅ' : 'う', 'ぇ' : 'え', 'ぉ' : 'お',
+    'が' : 'か', 'ぎ' : 'き', 'ぐ' : 'く', 'げ' : 'け', 'ご' : 'こ',
+    'ざ' : 'さ', 'じ' : 'し', 'ず' : 'す', 'ぜ' : 'せ', 'ぞ' : 'そ',
+    'だ' : 'た', 'ぢ' : 'ち', 'っ' : 'つ', 'づ' : 'つ', 'で' : 'て',
+    'ど' : 'と', 'ば' : 'は', 'ぱ' : 'は', 'び' : 'ひ', 'ぴ' : 'ひ',
+    'ぶ' : 'ふ', 'ぷ' : 'ふ', 'べ' : 'へ', 'ぺ' : 'へ', 'ぼ' : 'ほ',
+    'ぽ' : 'ほ', 'ゃ' : 'や', 'ゅ' : 'ゆ', 'ょ' : 'よ', 'ゎ' : 'わ',
+    'ゐ' : 'い', 'ゑ' : 'え', 'ゔ' : 'う'
+  };
 
   const cyoonDictionary = {
-    'あ': ['あ', 'か', 'さ', 'た', 'な', 'は', 'ま', 'や', 'ら', 'わ'],
-    'い': ['い', 'き', 'し', 'ち', 'に', 'ひ', 'み', 'り', 'ゐ'],
-    'う': ['う', 'く', 'す', 'つ', 'ぬ', 'ふ', 'む', 'ゆ', 'る'],
-    'え': ['え', 'け', 'せ', 'て', 'ね', 'へ', 'め', 'れ', 'ゑ'],
-    'お': ['お', 'こ', 'そ', 'と', 'の', 'ほ', 'も', 'よ', 'ろ', 'を']
-  }
+    'あ' : ['あ', 'か', 'さ', 'た', 'な', 'は', 'ま', 'や', 'ら', 'わ'],
+    'い' : ['い', 'き', 'し', 'ち', 'に', 'ひ', 'み', 'り', 'ゐ'],
+    'う' : ['う', 'く', 'す', 'つ', 'ぬ', 'ふ', 'む', 'ゆ', 'る'],
+    'え' : ['え', 'け', 'せ', 'て', 'ね', 'へ', 'め', 'れ', 'ゑ'],
+    'お' : ['お', 'こ', 'そ', 'と', 'の', 'ほ', 'も', 'よ', 'ろ', 'を']
+  };
 
   Object.keys(defaultSortDictionary).forEach((key) => {
     str = str.replace(new RegExp(key, 'g'), defaultSortDictionary[key]);
   });
   str = str.replace(/.[\u30FC\u2010-\u2015\u2212\uFF70-]/g, (match) => {
     const firstLetter = match.slice(0, 1);
-    const result = Object.keys(cyoonDictionary).reduce((r, key)  => {
-      return (cyoonDictionary[key].indexOf(firstLetter) >= 0) ? key : r;
+    const result = Object.keys(cyoonDictionary).reduce((res, key)  => {
+      return (cyoonDictionary[key].indexOf(firstLetter) >= 0) ? key : res;
     }, null);
     return result ? (firstLetter + result) : match;
   });
