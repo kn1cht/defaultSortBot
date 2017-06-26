@@ -4,8 +4,9 @@
   "description": "add DEFAULTSORT automatically to mediawiki articles.",
   "main": "main.js",
   "scripts": {
-    "test": "npm run lint",
-    "lint": "eslint *.js"
+    "test": "npm run lint && npm run mocha",
+    "lint": "eslint *.js",
+    "mocha": "mocha"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,10 @@
     "unorm": "^1.4.1"
   },
   "devDependencies": {
-    "eslint": "^4.1.0"
+    "chai": "^4.0.2",
+    "eslint": "^4.1.0",
+    "mockery": "^2.1.0",
+    "nock": "^9.0.13",
+    "rewire": "^2.5.2"
   }
 }

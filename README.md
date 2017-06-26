@@ -1,4 +1,4 @@
-# defaultSortBot
+# defaultSortBot [![Build Status](https://travis-ci.org/kn1cht/defaultSortBot.svg?branch=master)](https://travis-ci.org/kn1cht/defaultSortBot)
 Add **Japanese**
 [sort key](https://ja.wikipedia.org/wiki/Help:%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA#.E3.82.BD.E3.83.BC.E3.83.88.E3.82.AD.E3.83.BC)
 automatically to mediawiki articles as DEFAULTSORT.
