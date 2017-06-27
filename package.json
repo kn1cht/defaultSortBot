@@ -24,10 +24,11 @@
     "unorm": "^1.4.1"
   },
   "devDependencies": {
-    "chai": "^4.0.2",
     "eslint": "^4.1.0",
+    "mocha": "^3.4.2",
     "mockery": "^2.1.0",
     "nock": "^9.0.13",
+    "power-assert": "^1.4.4",
     "rewire": "^2.5.2"
   }
 }
