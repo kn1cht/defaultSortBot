@@ -1,14 +1,11 @@
 const assert = require('power-assert');
+const config = require('config'); // NODE_ENV=test
 const nock = require('nock');
-const mockery = require('mockery');
 const rewire = require('rewire');
 
 const main = require('../main.js');
 const main_rewire = rewire('../main.js');
 
-const fake_server = 'fake.server.com';
-const fake_username = 'user';
-const fake_password = 'pass';
 
 describe('katakanaToHiragana', () => {
   it('convert カタカナ to ひらがな', () => {
@@ -50,24 +47,21 @@ describe('normalizeForDefaultSort', () => {
 
 describe('defaultSortBot', () => {
   before(() => {
-    mockery.registerMock('../config/default.yaml', {
-      server: fake_server,
-      path: '/wiki',
-      username: fake_username,
-      password: fake_password,
-      namespaces: [
-        {id: 0, prefix: ''},
-        {id: 0, prefix: 'カテゴリ'},
-      ]
-    });
+    nock(config.server).get(config.path).reply(200, {
+      "login": {
+        "result": "Success",
+        "lguserid": 12345,
+        "lgusername": fake_username
+      }
   });
   beforeEach(() => {
-    return mockery.enable({ warnOnUnregistered: false });
   });
   afterEach(() => {
     //delete require.cache[require.resolve('main.js')];
     //nock.cleanAll();
-    //return mockery.disable();
   });
-  it('get mediawiki pages and add proper sort key');
+  it('get mediawiki pages and add proper sort key', () => {
+    require('../main.js');
+    });
+  });
 })

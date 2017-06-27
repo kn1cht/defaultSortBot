@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run lint && npm run mocha",
     "lint": "eslint *.js",
-    "mocha": "mocha"
+    "mocha": "NODE_ENV=test mocha"
   },
   "repository": {
     "type": "git",
@@ -26,7 +26,6 @@
   "devDependencies": {
     "eslint": "^4.1.0",
     "mocha": "^3.4.2",
-    "mockery": "^2.1.0",
     "nock": "^9.0.13",
     "power-assert": "^1.4.4",
     "rewire": "^2.5.2"

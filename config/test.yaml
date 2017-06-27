@@ -1,0 +1,11 @@
+server: "fake.server.com"
+path: "/wiki"
+username: "user"
+password: "pass"
+namespaces:
+  -
+    id: 0
+    prefix: ""
+  -
+    id: 0
+    prefix: "カテゴリ"
