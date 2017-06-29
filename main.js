@@ -35,6 +35,7 @@ function main() {
             return tokenize(title);
           }
         }).then((tokens) => {
+          if(!tokens) { return; }
           let reading = getReadingFromTokens(tokens);
           reading = japanese.hiraganize(reading);
           reading = normalizeForDefaultSort(reading);

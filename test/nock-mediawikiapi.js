@@ -13,15 +13,20 @@ const fakeAPI = {
 
 fakeAPI.title = {
   0 : {
-    nodefaultsort : 'デフォルトソートのないページ'
+    noDefaultSort          : 'デフォルトソートのないページ',
+    noDefaultSortWithAscii : 'DEFAULTSORTのないページ',
+    haveDefaultSort        : 'デフォルトソートのあるページ'
   },
   14: {
-    nodefaultsort : 'カテゴリ:デフォルトソートのないページ'
+    noDefaultSort          : 'カテゴリ:デフォルトソートのないページ',
+    noDefaultSortWithAscii : 'カテゴリ:DEFAULTSORTのないページ',
+    haveDefaultSort        : 'カテゴリ:デフォルトソートのあるページ'
   }
 };
 
 fakeAPI.ans = {
-  nodefaultsort: '\n{{DEFAULTSORT: てふおるとそおとのないへえし}}'
+  noDefaultSort          : '\n{{DEFAULTSORT: てふおるとそおとのないへえし}}',
+  noDefaultSortWithAscii : '\n{{DEFAULTSORT: DEFAULTSORTのないへえし}}'
 };
 
 fakeAPI.login = {
@@ -43,8 +48,20 @@ fakeAPI.edit = {
   request : (body) => (body.action === 'edit'),
   reply : function(uri, requestBody) {
     const req = querystring.parse(requestBody);
-    //req.title === fakeAPI.title.nodefaultsort
-    assert(req.text === fakeAPI.ans.nodefaultsort);
+    assert(req.title != fakeAPI.title[0].haveDefaultSort, 'leaves page that already have sort key as it is');
+    assert(req.title != fakeAPI.title[14].haveDefaultSort, 'leaves page that already have sort key as it is');
+    if(req.title === fakeAPI.title[0].noDefaultSort) {
+      assert(req.text === fakeAPI.ans.noDefaultSort, 'generates proper sort key');
+    }
+    else if(req.title === fakeAPI.title[0].noDefaultSortWithAscii) {
+      assert(req.text === fakeAPI.ans.noDefaultSortWithAscii, 'leaves non-Japanese character as it is');
+    }
+    else if(req.title === fakeAPI.title[14].noDefaultSort) {
+      assert(req.text === fakeAPI.ans.noDefaultSort, 'removes namespace prefix');
+    }
+    else if(req.title === fakeAPI.title[14].noDefaultSortWithAscii) {
+      assert(req.text === fakeAPI.ans.noDefaultSortWithAscii, 'removes namespace prefix');
+    }
     return { edit : { result : 'Success' } };
   }
 };
@@ -57,7 +74,7 @@ fakeAPI.query = {
       return fakeAPI.query.allpages(query);
     }
     else if(query.prop === 'revisions' && query.rvprop === 'content') {
-      return fakeAPI.query.revisions();
+      return fakeAPI.query.revisions(query);
     }
     else if(query.meta === 'siteinfo' && query.siprop === 'general') {
       return fakeAPI.query.siteinfo();
@@ -67,17 +84,27 @@ fakeAPI.query = {
     }
   },
   allpages: function(query) {
-    const title = fakeAPI.title[query.apnamespace].nodefaultsort;
-    return { batchcomplete : '', query : { allpages : [{ title : title }]}};
+    return { batchcomplete : '', query : { allpages : [
+      { title : fakeAPI.title[query.apnamespace].noDefaultSort },
+      { title : fakeAPI.title[query.apnamespace].noDefaultSortWithAscii },
+      { title : fakeAPI.title[query.apnamespace].haveDefaultSort }
+    ]}};
   },
-  revisions: function() {
+  revisions: function(query) {
+    let content = '';
+    if(query.titles == fakeAPI.title[0].haveDefaultSort || query.titles == fakeAPI.title[14].haveDefaultSort) {
+      content = '{{DEFAULTSORT: てふおるとそおとのあるへえし}}'
+    }
     return {
       batchcomplete : '', query : { pages : { 1 : {
-        ns : 0, title : fakeAPI.title.nodefaultsort, revisions : [{
-          contentformat : 'text/x-wiki',
-          contentmodel  : 'wikitext',
-          '*'           : ''
-        }]
+        title     : query.titles,
+        revisions : [
+          {
+            contentformat : 'text/x-wiki',
+            contentmodel  : 'wikitext',
+            '*'           : content
+          }
+        ]
       }}}
     };
   },

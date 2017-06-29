@@ -24,6 +24,9 @@ describe('normalizeForDefaultSort', () => {
   it('convert 長音 to 母音', () => {
     assert(normalizeForDefaultSort('あーきーすーつーのー') === 'ああきいすうつうのお');
   });
+  it('do nothing hyphen not for 長音', () => {
+    assert(normalizeForDefaultSort('0-a-$-0ー') === '0-a-$-0ー');
+  });
   it('do nothing against not ひらがな character', () => {
     assert(normalizeForDefaultSort('Abc123"#$') === 'Abc123"#$');
   });
@@ -42,13 +45,12 @@ describe('defaultSortBot', function() {
     nock.cleanAll();
   });
   it('find page without sort key and add proper sort key', (done) => {
-    const editReq = nock(fakeAPI.server).persist()
-      .post(fakeAPI.path, fakeAPI.edit.request)
-      .reply(200, fakeAPI.edit.reply);
+    const edit = nock(fakeAPI.server).persist()
+      .post(fakeAPI.path, fakeAPI.edit.request).reply(200, fakeAPI.edit.reply);
     main.__get__('main')();
     setInterval(() => {
-      if(editReq.isDone() === true) {
-        editReq.done(); // nock assertion
+      if(edit.isDone() === true) {
+        edit.done(); // nock assertion
         done();
       }
     }, 100);
