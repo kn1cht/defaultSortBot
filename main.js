@@ -2,6 +2,7 @@
 'use strict';
 
 const config = require('config');
+const japanese = require('japanese');
 const nodemw = require('nodemw');
 const tokenize = require('kuromojin').tokenize;
 const unorm = require('unorm');
@@ -29,11 +30,14 @@ function main() {
         getArticlePromise(page.title).then((data) => {
           pageData = data;
           if(/\{\{DEFAULTSORT:.*\}\}/.test(pageData)) { return; } // skip if page already have DEFAULTSORT
-          else { return tokenize(pageTitleNoPrefix); }
+          else {
+            const title = unorm.nfkc(pageTitleNoPrefix); // unicode normalization
+            return tokenize(title);
+          }
         }).then((tokens) => {
           if(!tokens) { return; }
           let reading = getReadingFromTokens(tokens);
-          reading = katakanaToHiragana(reading);
+          reading = japanese.hiraganize(reading);
           reading = normalizeForDefaultSort(reading);
 
           pageData += '\n{{DEFAULTSORT: ' + reading + '}}';
@@ -83,15 +87,7 @@ function getReadingFromTokens(tokens) {
   let reading = tokens.reduce((res, token) => {
     return (token.reading) ? (res + token.reading) : (res + token.surface_form);
   }, '');
-  reading = unorm.nfkc(reading); // unicode normalization
   return reading;
-}
-
-function katakanaToHiragana(src) {
-  return src.replace(/[\u30a1-\u30f6]/g, (match) => {
-    const chr = match.charCodeAt(0) - 0x60;
-    return String.fromCharCode(chr);
-  });
 }
 
 function normalizeForDefaultSort(str) {
