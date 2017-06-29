@@ -35,7 +35,6 @@ function main() {
             return tokenize(title);
           }
         }).then((tokens) => {
-          if(!tokens) { return; }
           let reading = getReadingFromTokens(tokens);
           reading = japanese.hiraganize(reading);
           reading = normalizeForDefaultSort(reading);
@@ -84,10 +83,9 @@ function getArticlePromise(title) {
 }
 
 function getReadingFromTokens(tokens) {
-  let reading = tokens.reduce((res, token) => {
+  return tokens.reduce((res, token) => {
     return (token.reading) ? (res + token.reading) : (res + token.surface_form);
   }, '');
-  return reading;
 }
 
 function normalizeForDefaultSort(str) {
