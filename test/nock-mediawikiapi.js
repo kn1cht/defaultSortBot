@@ -2,7 +2,6 @@
 
 const assert = require('power-assert');
 const config = require('config'); // NODE_ENV=test
-const url = require('url');
 const querystring = require('querystring');
 
 const csrftoken = '00112233445566778899aabbccddeeff+\\';
@@ -22,8 +21,8 @@ fakeAPI.title = {
 };
 
 fakeAPI.ans = {
-  nodefaultsort: "\n{{DEFAULTSORT: てふおるとそおとのないへえし}}"
-}
+  nodefaultsort: '\n{{DEFAULTSORT: てふおるとそおとのないへえし}}'
+};
 
 fakeAPI.login = {
   request : (body) => (
@@ -50,69 +49,43 @@ fakeAPI.edit = {
   }
 };
 
-fakeAPI.allpages = {
-  query : (query) => (
-    query.action === 'query' &&
-    query.list === 'allpages'
-  ),
+fakeAPI.query = {
+  request: (query) => (query.action === 'query'),
   reply : function() {
-    //const req = url.parse(this.req.path, true);
-    const namespace = this.req.path.match(/apnamespace=(.*?)&/)[0].split(/(=|&)/)[2];
-    const title = fakeAPI.title[namespace].nodefaultsort;
-    console.log('ns: '+namespace+' title: '+title);
-    return { batchcomplete : '', query : { allpages : [ { title : title } ] } };
-  }
-};
-
-fakeAPI.revisions = {
-  query : (query) => (
-    query.action === 'query' &&
-    query.prop === 'revisions' &&
-    query.rvprop === 'content'
-  ),
-  reply : function() {
+    const query = querystring.parse((this.req.path.split('?').slice(-1))[0]);
+    if(query.list === 'allpages') {
+      return fakeAPI.query.allpages(query);
+    }
+    else if(query.prop === 'revisions' && query.rvprop === 'content') {
+      return fakeAPI.query.revisions();
+    }
+    else if(query.meta === 'siteinfo' && query.siprop === 'general') {
+      return fakeAPI.query.siteinfo();
+    }
+    else if(query.meta === 'tokens' && query.type === 'csrf') {
+      return fakeAPI.query.csrftokens();
+    }
+  },
+  allpages: function(query) {
+    const title = fakeAPI.title[query.apnamespace].nodefaultsort;
+    return { batchcomplete : '', query : { allpages : [{ title : title }]}};
+  },
+  revisions: function() {
     return {
-      batchcomplete : '',
-      query : {
-        pages : {
-          1 : {
-            ns        : 0,
-            title     : fakeAPI.title.nodefaultsort,
-            revisions : [
-              {
-                contentformat : 'text/x-wiki',
-                contentmodel  : 'wikitext',
-                '*'           : ''
-              }
-            ]
-          }
-        }
-      }
+      batchcomplete : '', query : { pages : { 1 : {
+        ns : 0, title : fakeAPI.title.nodefaultsort, revisions : [{
+          contentformat : 'text/x-wiki',
+          contentmodel  : 'wikitext',
+          '*'           : ''
+        }]
+      }}}
     };
-  }
-};
-
-fakeAPI.siteinfo = {
-  query : (query) => (
-    query.action === 'query' &&
-    query.meta === 'siteinfo' &&
-    query.siprop === 'general'
-  ),
-  reply : {
-    batchcomplete : '',
-    query         : { general : { generator : 'MediaWiki 1.27.0' } }
-  }
-};
-
-fakeAPI.csrftokens = {
-  query : (query) => (
-    query.action === 'query' &&
-    query.meta === 'tokens' &&
-    query.type === 'csrf'
-  ),
-  reply : {
-    batchcomplete : '',
-    query         : { tokens : { csrftoken : csrftoken } }
+  },
+  siteinfo: function() {
+    return { batchcomplete : '', query : { general : { generator : 'MediaWiki 1.27.0' }}};
+  },
+  csrftokens: function() {
+    return  { batchcomplete : '', query : { tokens : { csrftoken : csrftoken }}};
   }
 };
 

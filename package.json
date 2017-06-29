@@ -4,10 +4,11 @@
   "description": "add DEFAULTSORT automatically to mediawiki articles.",
   "main": "main.js",
   "scripts": {
-    "test": "npm run lint && npm run istanbul",
+    "test": "npm run lint && npm run coveralls",
     "lint": "eslint *.js",
     "mocha": "NODE_ENV=test mocha --require intelli-espower-loader",
-    "istanbul": "NODE_ENV=test istanbul cover --report html _mocha"
+    "istanbul": "NODE_ENV=test istanbul cover --report html _mocha",
+    "coveralls": "NODE_ENV=test istanbul cover _mocha --report lcovonly -- -R spec"
   },
   "repository": {
     "type": "git",

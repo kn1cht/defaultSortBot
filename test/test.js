@@ -31,29 +31,20 @@ describe('normalizeForDefaultSort', () => {
 
 describe('defaultSortBot', function() {
   this.timeout(10000);
-  let editReq;
   beforeEach(() => {
     nock(fakeAPI.server).persist()
-      .post(fakeAPI.path, fakeAPI.login.request)
-      .reply(200, fakeAPI.login.reply)
-      .get(fakeAPI.path).query(fakeAPI.allpages.query)
-      .reply(200, fakeAPI.allpages.reply)
-      .get(fakeAPI.path).query(fakeAPI.revisions.query)
-      .reply(200, fakeAPI.revisions.reply)
-      .get(fakeAPI.path).query(fakeAPI.siteinfo.query)
-      .reply(200, fakeAPI.siteinfo.reply)
-      .get(fakeAPI.path).query(fakeAPI.csrftokens.query)
-      .reply(200, fakeAPI.csrftokens.reply);
+      .post(fakeAPI.path, fakeAPI.login.request).reply(200, fakeAPI.login.reply)
+      .get(fakeAPI.path).query(fakeAPI.query.request).reply(200, fakeAPI.query.reply)
 
-    editReq = nock(fakeAPI.server).persist()
-      .post(fakeAPI.path, fakeAPI.edit.request)
-      .reply(200, fakeAPI.edit.reply);
   });
   afterEach(() => {
     delete require.cache[require.resolve('../main.js')];
     nock.cleanAll();
   });
   it('find page without sort key and add proper sort key', (done) => {
+    const editReq = nock(fakeAPI.server).persist()
+      .post(fakeAPI.path, fakeAPI.edit.request)
+      .reply(200, fakeAPI.edit.reply);
     main.__get__('main')();
     setInterval(() => {
       if(editReq.isDone() === true) {
