@@ -17,7 +17,7 @@ fakeAPI.title = {
     noDefaultSortWithAscii : 'DEFAULTSORTのないページ',
     haveDefaultSort        : 'デフォルトソートのあるページ'
   },
-  14: {
+  14 : {
     noDefaultSort          : 'カテゴリ:デフォルトソートのないページ',
     noDefaultSortWithAscii : 'カテゴリ:DEFAULTSORTのないページ',
     haveDefaultSort        : 'カテゴリ:デフォルトソートのあるページ'
@@ -46,7 +46,7 @@ fakeAPI.login = {
 
 fakeAPI.edit = {
   request : (body) => (body.action === 'edit'),
-  reply : function(uri, requestBody) {
+  reply   : function(uri, requestBody) {
     const req = querystring.parse(requestBody);
     assert(req.title != fakeAPI.title[0].haveDefaultSort, 'leaves page that already have sort key as it is');
     assert(req.title != fakeAPI.title[14].haveDefaultSort, 'leaves page that already have sort key as it is');
@@ -67,8 +67,8 @@ fakeAPI.edit = {
 };
 
 fakeAPI.query = {
-  request: (query) => (query.action === 'query'),
-  reply : function() {
+  request : (query) => (query.action === 'query'),
+  reply   : function() {
     const query = querystring.parse((this.req.path.split('?').slice(-1))[0]);
     if(query.list === 'allpages') {
       return fakeAPI.query.allpages(query);
@@ -83,17 +83,17 @@ fakeAPI.query = {
       return fakeAPI.query.csrftokens();
     }
   },
-  allpages: function(query) {
+  allpages : function(query) {
     return { batchcomplete : '', query : { allpages : [
       { title : fakeAPI.title[query.apnamespace].noDefaultSort },
       { title : fakeAPI.title[query.apnamespace].noDefaultSortWithAscii },
       { title : fakeAPI.title[query.apnamespace].haveDefaultSort }
     ]}};
   },
-  revisions: function(query) {
+  revisions : function(query) {
     let content = '';
-    if(query.titles == fakeAPI.title[0].haveDefaultSort || query.titles == fakeAPI.title[14].haveDefaultSort) {
-      content = '{{DEFAULTSORT: てふおるとそおとのあるへえし}}'
+    if(query.titles === fakeAPI.title[0].haveDefaultSort || query.titles === fakeAPI.title[14].haveDefaultSort) {
+      content = '{{DEFAULTSORT: てふおるとそおとのあるへえし}}';
     }
     return {
       batchcomplete : '', query : { pages : { 1 : {
@@ -108,10 +108,10 @@ fakeAPI.query = {
       }}}
     };
   },
-  siteinfo: function() {
+  siteinfo : function() {
     return { batchcomplete : '', query : { general : { generator : 'MediaWiki 1.27.0' }}};
   },
-  csrftokens: function() {
+  csrftokens : function() {
     return  { batchcomplete : '', query : { tokens : { csrftoken : csrftoken }}};
   }
 };
