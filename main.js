@@ -13,73 +13,33 @@ const bot = new nodemw({
   path   : config.path,
 });
 
-module.exports = main;
-
 if (require.main === module) { main(); }
 
 function main() {
-  config.namespaces.forEach((ns) => {
-    logInPromise(config.username, config.password).then(() => { // login to get permisson
-      return getPagesInNamespacePromise(ns.id); // get page data as JSON
-    }).then((data) => {
-      data.forEach((page) => {
-        let pageData = null;
+  (async() => {
+    await logInPromise(config.username, config.password); // login to get permisson
+    for(const ns of config.namespaces) {
+      const allpage = await getPagesInNamespacePromise(ns.id); // get page data as JSON
+      for(const page of allpage) {
+        let pageData = await getArticlePromise(page.title);
         const pageTitleNoPrefix = (page.title.indexOf(ns.prefix + ':') >= 0) ? page.title.substr(ns.prefix.length + 1) : page.title;
         let editSummary = 'Bot: Add DEFAULTSORT ';
 
-        getArticlePromise(page.title).then((data) => {
-          pageData = data;
-          if(/\{\{DEFAULTSORT:.*\}\}/.test(pageData)) { return; } // skip if page already have DEFAULTSORT
-          else {
-            const title = unorm.nfkc(pageTitleNoPrefix); // unicode normalization
-            return tokenize(title);
-          }
-        }).then((tokens) => {
-          if(!tokens) { return; }
-          let reading = getReadingFromTokens(tokens);
-          reading = japanese.hiraganize(reading);
-          reading = normalizeForDefaultSort(reading);
+        if(/\{\{DEFAULTSORT:.*\}\}/.test(pageData)) { continue; } // skip if page already have DEFAULTSORT
+        const title = unorm.nfkc(pageTitleNoPrefix); // unicode normalization
+        const tokens = await tokenize(title);
+        let reading = getReadingFromTokens(tokens);
+        reading = japanese.hiraganize(reading);
+        reading = normalizeForDefaultSort(reading);
 
-          pageData += '\n{{DEFAULTSORT: ' + reading + '}}';
-          editSummary += reading;
-          bot.edit(page.title, pageData, editSummary, (err) => {
-            if(err) { console.error(err); }
-            console.info('Edited ' + page.title + '/ ' + editSummary);
-          });
-        }).catch((err) => {
-          console.error(err);
-        });
-      });
-    }).catch((err) => {
-      console.error(err);
-    });
-  });
-}
-
-function logInPromise(username, password) {
-  return new Promise((resolve, reject) => {
-    bot.logIn(username, password, (err) => {
-      if (err) { reject(err); }
-      else { resolve();  }
-    });
-  });
-}
-
-function getPagesInNamespacePromise(namespace) {
-  return new Promise((resolve, reject) => {
-    bot.getPagesInNamespace(namespace, (err, data) => {
-      if (err) { reject(err); }
-      else { resolve(data);  }
-    });
-  });
-}
-
-function getArticlePromise(title) {
-  return new Promise((resolve, reject) => {
-    bot.getArticle(title, (err, data) => {
-      if (err) { reject(err); }
-      else { resolve(data);  }
-    });
+        pageData += '\n{{DEFAULTSORT: ' + reading + '}}';
+        editSummary += reading;
+        await editPromise(page.title, pageData, editSummary);
+        console.info('Edited ' + page.title + '/ ' + editSummary);
+      }
+    }
+  })().catch((err) => {
+    console.error(err);
   });
 }
 
@@ -109,9 +69,10 @@ function normalizeForDefaultSort(str) {
     'お' : ['お', 'こ', 'そ', 'と', 'の', 'ほ', 'も', 'よ', 'ろ', 'を']
   };
 
-  Object.keys(defaultSortDictionary).forEach((key) => {
+  for(const key in defaultSortDictionary) {
+    if(!defaultSortDictionary.hasOwnProperty(key)) { continue; }
     str = str.replace(new RegExp(key, 'g'), defaultSortDictionary[key]);
-  });
+  }
   str = str.replace(/.[\u30FC\u2010-\u2015\u2212\uFF70-]/g, (match) => {
     const firstLetter = match.slice(0, 1);
     const result = Object.keys(cyoonDictionary).reduce((res, key)  => {
@@ -121,3 +82,40 @@ function normalizeForDefaultSort(str) {
   });
   return str;
 }
+
+function logInPromise(username, password) {
+  return new Promise((resolve, reject) => {
+    bot.logIn(username, password, (err) => {
+      if (err) { reject(err); }
+      else { resolve();  }
+    });
+  });
+}
+
+function getPagesInNamespacePromise(namespace) {
+  return new Promise((resolve, reject) => {
+    bot.getPagesInNamespace(namespace, (err, data) => {
+      if (err) { reject(err); }
+      else { resolve(data);  }
+    });
+  });
+}
+
+function getArticlePromise(title) {
+  return new Promise((resolve, reject) => {
+    bot.getArticle(title, (err, data) => {
+      if (err) { reject(err); }
+      else { resolve(data);  }
+    });
+  });
+}
+
+function editPromise(title, data, summary) {
+  return new Promise((resolve, reject) => {
+    bot.edit(title, data, summary, (err) => {
+      if (err) { reject(err); }
+      else { resolve();  }
+    });
+  });
+}
+

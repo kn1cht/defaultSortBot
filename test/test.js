@@ -33,21 +33,18 @@ describe('normalizeForDefaultSort', () => {
 });
 
 describe('defaultSortBot', function() {
-  this.timeout(10000);
-  beforeEach(() => {
-    nock(fakeAPI.server).persist()
-      .post(fakeAPI.path, fakeAPI.login.request).reply(200, fakeAPI.login.reply)
-      .get(fakeAPI.path).query(fakeAPI.query.request).reply(200, fakeAPI.query.reply)
-
-  });
-  afterEach(() => {
+  after(() => {
     delete require.cache[require.resolve('../main.js')];
     nock.cleanAll();
   });
   it('find page without sort key and add proper sort key', (done) => {
+    main.__get__('main')();
+    nock(fakeAPI.server).persist()
+      .post(fakeAPI.path, fakeAPI.login.request).reply(200, fakeAPI.login.reply)
+      .get(fakeAPI.path).query(fakeAPI.query.request).reply(200, fakeAPI.query.reply)
     const edit = nock(fakeAPI.server).persist()
       .post(fakeAPI.path, fakeAPI.edit.request).reply(200, fakeAPI.edit.reply);
-    main.__get__('main')();
+
     setInterval(() => {
       if(edit.isDone() === true) {
         edit.done(); // nock assertion
@@ -56,3 +53,4 @@ describe('defaultSortBot', function() {
     }, 100);
   });
 });
+
