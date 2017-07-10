@@ -33,6 +33,7 @@ describe('normalizeForDefaultSort', () => {
 });
 
 describe('defaultSortBot', function() {
+  this.timeout(10000);
   after(() => {
     delete require.cache[require.resolve('../main.js')];
     nock.cleanAll();
