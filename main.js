@@ -6,6 +6,7 @@ const japanese = require('japanese');
 const nodemw = require('nodemw');
 const tokenize = require('kuromojin').tokenize;
 const unorm = require('unorm');
+const util = require('util');
 
 /*** mediawiki API bot ***/
 const bot = new nodemw({
@@ -17,11 +18,11 @@ if (require.main === module) { main(); }
 
 function main() {
   (async() => {
-    await logInPromise(config.username, config.password); // login to get permisson
+    await util.promisify(bot.logIn).bind(bot) (config.username, config.password); // login to get permisson
     for(const ns of config.namespaces) {
-      const allpage = await getPagesInNamespacePromise(ns.id); // get page data as JSON
+      const allpage = await util.promisify(bot.getPagesInNamespace).bind(bot) (ns.id); // get page data as JSON
       for(const page of allpage) {
-        let pageData = await getArticlePromise(page.title);
+        let pageData = await util.promisify(bot.getArticle).bind(bot) (page.title);
         const pageTitleNoPrefix = (page.title.indexOf(ns.prefix + ':') >= 0) ? page.title.substr(ns.prefix.length + 1) : page.title;
         let editSummary = 'Bot: Add DEFAULTSORT ';
 
@@ -34,7 +35,7 @@ function main() {
 
         pageData += '\n{{DEFAULTSORT: ' + reading + '}}';
         editSummary += reading;
-        await editPromise(page.title, pageData, editSummary);
+        await util.promisify(bot.edit).bind(bot) (page.title, pageData, editSummary);
         console.info('Edited ' + page.title + '/ ' + editSummary);
       }
     }
@@ -81,41 +82,5 @@ function normalizeForDefaultSort(str) {
     return result ? (firstLetter + result) : match;
   });
   return str;
-}
-
-function logInPromise(username, password) {
-  return new Promise((resolve, reject) => {
-    bot.logIn(username, password, (err) => {
-      if (err) { reject(err); }
-      else { resolve();  }
-    });
-  });
-}
-
-function getPagesInNamespacePromise(namespace) {
-  return new Promise((resolve, reject) => {
-    bot.getPagesInNamespace(namespace, (err, data) => {
-      if (err) { reject(err); }
-      else { resolve(data);  }
-    });
-  });
-}
-
-function getArticlePromise(title) {
-  return new Promise((resolve, reject) => {
-    bot.getArticle(title, (err, data) => {
-      if (err) { reject(err); }
-      else { resolve(data);  }
-    });
-  });
-}
-
-function editPromise(title, data, summary) {
-  return new Promise((resolve, reject) => {
-    bot.edit(title, data, summary, (err) => {
-      if (err) { reject(err); }
-      else { resolve();  }
-    });
-  });
 }
 
