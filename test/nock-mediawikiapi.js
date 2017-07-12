@@ -44,12 +44,25 @@ fakeAPI.login = {
   }
 };
 
+fakeAPI.loginfail = {
+  request : (body) => (
+    body.action === 'login' &&
+    body.lgname === config.username &&
+    body.lgpassword === config.password
+  ),
+  reply : {
+    login : {
+      result : 'WrongPass'
+    }
+  }
+};
+
 fakeAPI.edit = {
   request : (body) => (body.action === 'edit'),
   reply   : function(uri, requestBody) {
     const req = querystring.parse(requestBody);
-    assert(req.title != fakeAPI.title[0].haveDefaultSort, 'leaves page that already have sort key as it is');
-    assert(req.title != fakeAPI.title[14].haveDefaultSort, 'leaves page that already have sort key as it is');
+    assert(req.title !== fakeAPI.title[0].haveDefaultSort, 'leaves page that already have sort key as it is');
+    assert(req.title !== fakeAPI.title[14].haveDefaultSort, 'leaves page that already have sort key as it is');
     if(req.title === fakeAPI.title[0].noDefaultSort) {
       assert(req.text === fakeAPI.ans.noDefaultSort, 'generates proper sort key');
     }

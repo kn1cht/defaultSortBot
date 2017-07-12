@@ -14,6 +14,8 @@ const bot = new nodemw({
   path   : config.path,
 });
 
+module.exports = main;
+/* istanbul ignore if */
 if (require.main === module) { main(); }
 
 function main() {
@@ -23,13 +25,15 @@ function main() {
       const allpage = await util.promisify(bot.getPagesInNamespace).bind(bot) (ns.id); // get page data as JSON
       for(const page of allpage) {
         let pageData = await util.promisify(bot.getArticle).bind(bot) (page.title);
-        const pageTitleNoPrefix = (page.title.indexOf(ns.prefix + ':') >= 0) ? page.title.substr(ns.prefix.length + 1) : page.title;
+        const pageTitle = (page.title.indexOf(ns.prefix + ':') >= 0) ? page.title.substr(ns.prefix.length + 1) : page.title;
         let editSummary = 'Bot: Add DEFAULTSORT ';
 
         if(/\{\{DEFAULTSORT:.*\}\}/.test(pageData)) { continue; } // skip if page already have DEFAULTSORT
-        const title = unorm.nfkc(pageTitleNoPrefix); // unicode normalization
+        const title = unorm.nfkc(pageTitle); // unicode normalization
         const tokens = await tokenize(title);
-        let reading = getReadingFromTokens(tokens);
+        let reading = tokens.reduce((res, token) => {
+          return (token.reading) ? (res + token.reading) : (res + token.surface_form);
+        }, '');
         reading = japanese.hiraganize(reading);
         reading = normalizeForDefaultSort(reading);
 
@@ -42,12 +46,6 @@ function main() {
   })().catch((err) => {
     console.error(err);
   });
-}
-
-function getReadingFromTokens(tokens) {
-  return tokens.reduce((res, token) => {
-    return (token.reading) ? (res + token.reading) : (res + token.surface_form);
-  }, '');
 }
 
 function normalizeForDefaultSort(str) {
@@ -71,6 +69,7 @@ function normalizeForDefaultSort(str) {
   };
 
   for(const key in defaultSortDictionary) {
+    /* istanbul ignore if */
     if(!defaultSortDictionary.hasOwnProperty(key)) { continue; }
     str = str.replace(new RegExp(key, 'g'), defaultSortDictionary[key]);
   }
