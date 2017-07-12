@@ -30,6 +30,8 @@ Set your config in default.yaml before run defaultSortBot.
 - namespaces : [namespace](https://www.mediawiki.org/wiki/Manual:Namespace/ja) to process.
   * id: namespace id number(get list from `api.php?action=query&meta=siteinfo&siprop=namespaces`).
   * prefix: namespace prefix(e.g. `"Category"`) to exclude from DEFAULTSORT
+  
+**Warning: ** DO NOT set default sort key to the pages which are included in another page, such as Template pages.
 
 ## Run as scheduled task
 
