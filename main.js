@@ -10,8 +10,9 @@ const util = require('util');
 
 /*** mediawiki API bot ***/
 const bot = new nodemw({
-  server : config.server,
-  path   : config.path,
+  protocol : config.protocol,
+  server   : config.server,
+  path     : config.path,
 });
 
 module.exports = main;
