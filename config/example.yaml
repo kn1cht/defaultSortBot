@@ -2,6 +2,7 @@ server: # your mediawiki server
   "ja.wikipedia.org"
 path: #your api.php path
   "/w"
+protocol: http  # http or https
 username: # your username
 password: # your password
 namespaces: # namespace id and prefix to process
