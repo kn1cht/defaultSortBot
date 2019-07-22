@@ -69,10 +69,8 @@ function normalizeForDefaultSort(str) {
     'お' : ['お', 'こ', 'そ', 'と', 'の', 'ほ', 'も', 'よ', 'ろ', 'を']
   };
 
-  for(const key in defaultSortDictionary) {
-    /* istanbul ignore if */
-    if(!defaultSortDictionary.hasOwnProperty(key)) { continue; }
-    str = str.replace(new RegExp(key, 'g'), defaultSortDictionary[key]);
+  for (const [key, value] of Object.entries(defaultSortDictionary)) {
+    str = str.replace(new RegExp(key, 'g'), value);
   }
   str = str.replace(/.[\u30FC\u2010-\u2015\u2212\uFF70-]/g, (match) => {
     const firstLetter = match.slice(0, 1);
