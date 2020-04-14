@@ -22,7 +22,7 @@
     "js-yaml": "^3.8.4",
     "kuromojin": "^2.0.0",
     "node-cron": "^2.0.3",
-    "nodemw": "^0.12.1",
+    "nodemw": "^0.13.0",
     "unorm": "^1.4.1"
   },
   "devDependencies": {
