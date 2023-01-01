@@ -17,7 +17,7 @@
   "author": "kn1cht",
   "license": "MIT",
   "dependencies": {
-    "config": "^3.0.0",
+    "config": "^3.3.8",
     "japanese": "^1.2.0",
     "js-yaml": "^3.13.1",
     "kuromojin": "^2.0.0",
