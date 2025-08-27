@@ -27,12 +27,12 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.12",
-    "eslint": "^6.2.1",
+    "eslint": "^9.32.0",
     "intelli-espower-loader": "^1.0.1",
     "istanbul": "^1.1.0-alpha.1",
     "mocha": "^10.8.2",
     "nock": "^12.0.0",
     "power-assert": "^1.4.4",
-    "rewire": "^5.0.0"
+    "rewire": "^9.0.0"
   }
 }
